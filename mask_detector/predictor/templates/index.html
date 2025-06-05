@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Face Mask Detection</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        #videoElement, #capturedImage {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            margin-bottom: 1em;
+        }
+        .prediction-box {
+            margin-top: 1.5em;
+            padding: 1em;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="container py-5">
+
+    <h2 class="text-center mb-4">🩺 Face Mask Detection System</h2>
+
+    <!-- Image Upload Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5>Upload an Image</h5>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="file" name="image" class="form-control mb-2" required>
+                <button type="submit" class="btn btn-primary">Predict from File</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Webcam Capture -->
+    <div class="card mb-4">
+        <div class="card-body text-center">
+            <h5>Or Use Your Webcam</h5>
+            <video autoplay="true" id="videoElement"></video><br>
+            <button class="btn btn-success mt-2" onclick="captureImage()">Capture & Predict</button>
+            <form method="POST" enctype="multipart/form-data" id="webcamForm" style="display:none;">
+                {% csrf_token %}
+                <input type="hidden" name="webcam_image" id="webcam_image_data">
+            </form>
+            <canvas id="canvas" style="display:none;"></canvas>
+            <img id="capturedImage" src="" alt="Captured Image" style="display:none;" />
+        </div>
+    </div>
+
+    <!-- Prediction Result -->
+    {% if result %}
+    <div class="prediction-box text-center">
+        <h4>🧠 Prediction Result:</h4>
+        <p class="fs-5">Class: <strong>{{ result }}</strong></p>
+        {% if confidence %}
+        <p class="text-muted">Confidence (ETH): <strong>{{ confidence|floatformat:2 }}%</strong></p>
+        {% endif %}
+        {% if image_url %}
+        <img src="{{ image_url }}" width="200" class="img-fluid mt-2" />
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- JS: Webcam & Capture -->
+    <script>
+        const video = document.getElementById("videoElement");
+        const canvas = document.getElementById("canvas");
+        const imgTag = document.getElementById("capturedImage");
+        const imageInput = document.getElementById("webcam_image_data");
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => { video.srcObject = stream; })
+            .catch(err => { console.error("Webcam error:", err); });
+
+        function captureImage() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+            const dataUrl = canvas.toDataURL('image/png');
+            imgTag.src = dataUrl;
+            imgTag.style.display = 'block';
+            imageInput.value = dataUrl;
+            document.getElementById('webcamForm').submit();
+        }
+    </script>
+
+</body>
+</html>
