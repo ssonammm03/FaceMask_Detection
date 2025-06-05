@@ -48,5 +48,6 @@ Limitations:
 
 In the future, the system can be made better by using the best object detection model, YOLO to support the multiple face detection and the real-time application.
 
-10. Conclusion
+Conclusion
+
 This project showed the capability of deep learning in generating a face mask detection system for the sake of public healthcare and safety. To gain practical experience in classification of images, model testing and the practical implementation in real time, I learned the use of computer vision methods. The system can track masks in public places and (in the future) cope with more complicated situations. Overall, the project trained me technically to solve a real practical problem.
